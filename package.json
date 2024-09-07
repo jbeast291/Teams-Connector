@@ -7,8 +7,9 @@
   },
   "author": "Jacoby Smith, Jbeast291",
   "license": "ISC",
-  "description": "",
+  "description": "Connect teams to mc and other commands",
   "dependencies": {
-    "axios": "^1.7.5"
-  }
+    "axios": "^1.7.6"
+  },
+  "keywords": []
 }
