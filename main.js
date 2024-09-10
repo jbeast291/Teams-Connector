@@ -2,17 +2,27 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license.
 //
-//ngrok http 8000 --host-header="localhost:8000"
+//ngrok http 80 --host-header="localhost:80"
 
 //url example: https://2e01-2601-646-8f00-6c8e-cd9c-b774-a131-895e.ngrok-free.app/apisecret123456789101112?msgcontent=@{outputs('Get_message_details')?['body/body/content']}username=@{outputs('Get_message_details')?['body/from/user/displayName']}
 
-const http = require('http');
-const messageSender = require('./messageSender.js');
 
-const httpPort = process.env.port || process.env.PORT || 8000;
+const T2MCCard = require('./FormatedCards/t2mcResponse.js');
+
+const CommandHandler = require('./CommandHandler.js');
+
+
+
+
+CommandHandler.initCommands();
+CommandHandler.executeCommand("test");
+
+const http = require('http');
+const httpPost = require('./HTTPUtils/post.js');
+const httpPort = process.env.port || process.env.PORT || 80;
 const apiSecret = "apisecret123456789101112";
 
-http.createServer(function (request, response) {
+http.createServer(async function (request, response) {
     // Process the request
     console.log("Recived: " + request.url);
     //ensure url request is using api
@@ -38,7 +48,10 @@ http.createServer(function (request, response) {
         return;
     }
     
-    messageSender.sendTeamsMessage(name, messageContents);
+    //httpPost.htppPost(T2MCCard.getT2MCResponse(name, messageContents), "https://prod-80.westus.logic.azure.com:443/workflows/de117688d91e4ab8a0e9b6261cd1fd72/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bVBjUX7vJN4qCS5UB4Zdu7F4XPsZa2wby_9LsraU0Yw");
+
+    httpPost.htppPost(JSON.stringify({data: { name: `${name}`, message: `${messageContents}`},}), "http://localhost:8000");
+
 
     response.writeHead(200, { 'Content-Type': 'application/json' });
     response.end(JSON.stringify({
@@ -54,6 +67,8 @@ http.createServer(function (request, response) {
     }
 });
 
+
+//BELOW SHOULD BE MOVED TO ITS OWN FILE
 
 /**
 * @param {String} url
