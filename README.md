@@ -1,5 +1,17 @@
 # Teams Connector
- Connect teams to Minecraft and other (explanation needs to be expanded)
+  Connect Microsoft Teams to Minecraft with Workflows!
+
+This project uses the built-in Workflows to manage communications between a Minecraft server and Teams, acting as a middleman.
+
+Commands Currently Available:
+| !commands |
+|-----------|
+| !link     |
+| !unlink   |
+
+This project uses some hacky workarounds to get past having to pay for premium workflows. There is no way to send a post request for free with workflows so a Dropbox download module is used, requesting a file from a server but sending message contents and info in the url acting as a makeshift post request. Definitely not the most secure it does work :)
+
+The limitation is that the webhook address Microsoft gives can start to lag behind if a lot of messages are sent, causing responses to be delayed by minutes in extreme cases.
 
 ## Running Locally (designed to be beginner friendly):
 
