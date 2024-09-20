@@ -41,8 +41,21 @@ docker run --detach --name developmentmariadb --restart=unless-stopped -v /path/
 - ### MS teams workflows
 This project works on Microsoft Teams' workflows to get around restrictions
 
-Sadly Workflows cannot be copied out of teams easily so you will have to recreate it.
+Sadly Workflows cannot be copied out of teams easily so you will have to recreate it. Create a new flow and copy the same setup as below
 
+**Outgoing Workflow**
+
+![Outgoing Workflow](https://github.com/jbeast291/Teams-Connector/blob/main/images/DEVout.png?raw=true)
+
+This is the url at the last part, ensure it is exactly the same
+```
+https://af98-2601-646-8f00-6c8e-14c8-79a0-cc25-29d0.ngrok-free.app/development1234?msgcontent=@{outputs('Get_message_details')?['body/body/plainTextContent']}&username=@{outputs('Get_message_details')?['body/from/user/displayName']}&replyid=@{outputs('Get_message_details')?['body/replyToId']}&channelid=@{outputs('Get_message_details')?['body/channelId']}
+```
+Do also note that "development1234" is the API token in the config, so they must match up in both places to ensure it isn't some random person pinging the server 
+
+**Incoming Workflow**
+
+![Incoming Workflow]([https://github.com/jbeast291/Teams-Connector/blob/main/images/DEVout.png?raw=true](https://github.com/jbeast291/Teams-Connector/blob/main/images/DEVin.png))
 
 - ### Node project in visual studio
 
