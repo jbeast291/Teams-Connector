@@ -38,7 +38,7 @@ Use this if on windows (windows doesn't support multi-line by default):
 docker run --detach --name developmentmariadb --restart=unless-stopped -v /path/on/host/machine:/var/lib/mysql:Z -p 3306:3306 --env MYSQL_TCP_PORT=3306 --env MARIADB_DATABASE=minecraft --env MARIADB_ROOT_PASSWORD=devpassword mariadb:11.3.1-rc-jammy
 ````
 
-- ### MS teams workflows
+- ### MS Teams workflows
 This project works on Microsoft Teams' workflows to get around restrictions
 
 Sadly Workflows cannot be copied out of teams easily so you will have to recreate it. Create a new flow and copy the same setup as below
@@ -55,9 +55,11 @@ Do also note that "development1234" is the API token in the config, so they must
 
 **Incoming Workflow**
 
-![Incoming Workflow]([https://github.com/jbeast291/Teams-Connector/blob/main/images/DEVout.png?raw=true](https://github.com/jbeast291/Teams-Connector/blob/main/images/DEVin.png))
+![Incoming Workflow](https://github.com/jbeast291/Teams-Connector/blob/main/images/DEVin.png?raw=true)
 
-- ### Node project in visual studio
+When recreating this workflow you will notice that some of the options do not show up
+
+- ### Node project in Visual Studio
 
 Download the repo with the method of your choice to a folder (green button at the top for example). And unzip the repo into a folder where you want to store the server files.
 
