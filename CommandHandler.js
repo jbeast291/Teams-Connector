@@ -23,26 +23,28 @@ module.exports = {
                 }
             }
         }
-        console.log(commands);
     },
-    executeCommand: async function executeCommand(commandNameToExec) {
-        // Grab all the command folders from the commands directory
-        const foldersPath = path.join(__dirname, 'Commands');
-        const commandFolders = fs.readdirSync(foldersPath);
-
-        for (const folder of commandFolders) {
-            // Grab all the command files from the commands directory
-            const commandsPath = path.join(foldersPath, folder);
-            const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-            for (const file of commandFiles) {
-                const filePath = path.join(commandsPath, file);
-                const command = require(filePath);
-                if (command.commandName === commandNameToExec) {
-                    command.execute();
-                }
+    
+    executeCommand: async function executeCommand(commandNameToExec, channelId, replyId, messageContents, name) {
+        for(let command of commands){
+            if (command[0] === commandNameToExec.toLowerCase()) {
+                exec = require(command[1]);
+                exec.execute(channelId, replyId, messageContents, name);
             }
         }
-    }
+    },
+
+    checkIfCommandIsRegistered: async function checkIfCommandIsRegistered(commandNameToCheck) {
+        //check if command exists in cache
+        for(let command of commands){
+            if (command[0] === commandNameToCheck.toLowerCase()) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    
 };
 
 //get and register all commands

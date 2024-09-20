@@ -5,28 +5,21 @@
 //ngrok http 80 --host-header="localhost:80"
 
 //url example: https://2e01-2601-646-8f00-6c8e-cd9c-b774-a131-895e.ngrok-free.app/apisecret123456789101112?msgcontent=@{outputs('Get_message_details')?['body/body/content']}username=@{outputs('Get_message_details')?['body/from/user/displayName']}
+const database = require('./database/database');
 
-
-const T2MCCard = require('./FormatedCards/t2mcResponse.js');
-
+const { APISecret, HttpPort, CommandPrefix, IDOfParentMessageForTeams2MC, IDOfChannelForTeams2Mc, MCServerUrl } = require('./config/config.json');
+const http = require('http');
 const CommandHandler = require('./CommandHandler.js');
-
-
-
+const httppost = require('./HTTPUtils/post.js');
 
 CommandHandler.initCommands();
-CommandHandler.executeCommand("test");
 
-const http = require('http');
-const httpPost = require('./HTTPUtils/post.js');
-const httpPort = process.env.port || process.env.PORT || 80;
-const apiSecret = "apisecret123456789101112";
-
+const httpPort = process.env.port || process.env.PORT || HttpPort;
 http.createServer(async function (request, response) {
     // Process the request
     console.log("Recived: " + request.url);
     //ensure url request is using api
-    if(getApiSecretFromUrl(request.url) !== apiSecret) {
+    if(getApiSecretFromUrl(request.url) !== APISecret) {
         response.writeHead(403);
         response.end();
         console.log("ended request with invalid API Key!");
@@ -34,9 +27,12 @@ http.createServer(async function (request, response) {
     }
 
     const msgcomps = parseUrlVars(request.url);
-    const name = msgcomps[1];
     const messageContents = msgcomps[0];
-    console.log("message: (" + messageContents + ") Name: (" + name + ")")
+    const name = msgcomps[1];
+    const replyId = msgcomps[2];
+    const channelId = msgcomps[3];
+
+    console.log("\tmessage: (" + messageContents + ") Name: (" + name + ")")
 
     //check if the message was sent from a regular user (ie: not workflow/bot)
     if(name === ""){
@@ -47,12 +43,28 @@ http.createServer(async function (request, response) {
         }));
         return;
     }
-    
-    //httpPost.htppPost(T2MCCard.getT2MCResponse(name, messageContents), "https://prod-80.westus.logic.azure.com:443/workflows/de117688d91e4ab8a0e9b6261cd1fd72/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bVBjUX7vJN4qCS5UB4Zdu7F4XPsZa2wby_9LsraU0Yw");
 
-    httpPost.htppPost(JSON.stringify({data: { name: `${name}`, message: `${messageContents}`},}), "http://localhost:8000");
+    //check if this is meant for the mc server
+    if(replyId === IDOfParentMessageForTeams2MC && channelId === IDOfChannelForTeams2Mc) {
+        httppost.htppPost(JSON.stringify({
+            data: {
+                name: `${name}`,
+                message: `${messageContents}`
+            }
+        }), MCServerUrl)
+        console.log("\tSent message to mc server!")
+        return;
+    }
 
-
+    //execute it if it is a command
+    if(messageContents.charAt(0) === CommandPrefix){
+        console.log("\tcommand detected!");
+        const command = messageContents.split("!")[1].split(" ")[0]
+        if( await CommandHandler.checkIfCommandIsRegistered(command)){
+            console.log("\tcommand Valid!");
+            await CommandHandler.executeCommand(command, channelId, replyId, messageContents, name);
+        }
+    }
     response.writeHead(200, { 'Content-Type': 'application/json' });
     response.end(JSON.stringify({
         data: 'I aint payin for your premium workflows ;)',
@@ -66,6 +78,7 @@ http.createServer(async function (request, response) {
         console.log('Listening on port: %s', httpPort);
     }
 });
+
 
 
 //BELOW SHOULD BE MOVED TO ITS OWN FILE
@@ -85,10 +98,14 @@ function getApiSecretFromUrl(url) {
 */
 function parseUrlVars(url) {
     url = decodeURIComponent(url);
-    const urlArray = url.split("?");
 
-    const MsgContent = urlArray[1].split("msgcontent=")[1].split("&username=")[0];
-    const MsgSender = urlArray[1].split("&username=")[1];
+    const urlArray = url.slice(url.indexOf('?') + 1);
+    console.log(urlArray)
 
-    return [MsgContent, MsgSender];
+    const MsgContent = urlArray.split("msgcontent=")[1].split("&username=")[0];
+    const MsgSender = urlArray.split("&username=")[1].split("&replyid=")[0];
+    const ReplyID = urlArray.split("&replyid=")[1].split("&channelid=")[0];
+    const ChannelId = urlArray.split("&channelid=")[1];
+
+    return [MsgContent, MsgSender, ReplyID, ChannelId];
 }
