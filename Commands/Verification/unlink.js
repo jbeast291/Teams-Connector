@@ -6,6 +6,7 @@ const database = require('../../database/database.js');
 
 module.exports = {
 	commandName: "unlink",
+    requireAdmin: false,
     fileName: __filename,
     execute: async function execute(channelId, replyId, messageContents, name) {
         //check if user is in the database

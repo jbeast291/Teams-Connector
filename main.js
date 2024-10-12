@@ -4,13 +4,13 @@
 //
 //ngrok http 80 --host-header="localhost:80"
 
-//url example: https://2e01-2601-646-8f00-6c8e-cd9c-b774-a131-895e.ngrok-free.app/apisecret123456789101112?msgcontent=@{outputs('Get_message_details')?['body/body/content']}username=@{outputs('Get_message_details')?['body/from/user/displayName']}
 const database = require('./database/database');
 
-const { APISecret, HttpPort, CommandPrefix, IDOfParentMessageForTeams2MC, IDOfChannelForTeams2Mc, MCServerUrl } = require('./config/config.json');
+const { APISecret, HttpPort, CommandPrefix, IDOfParentMessageForTeams2MC, IDOfChannelForTeams2Mc, MCServerUrl, ResponseWebHookUrl } = require('./config/config.json');
 const http = require('http');
 const CommandHandler = require('./CommandHandler.js');
-const httppost = require('./HTTPUtils/post.js');
+const httpPost = require('./HTTPUtils/post.js');
+const genericResponse = require('./FormatedCards/genericResponse.js');
 
 CommandHandler.initCommands();
 
@@ -25,6 +25,11 @@ http.createServer(async function (request, response) {
         console.log("ended request with invalid API Key!");
         return;
     }
+    //respond that message was received and so teams doesn't fail the task
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({
+        data: 'I aint payin for your premium workflows ;)',
+    }));
 
     const msgcomps = parseUrlVars(request.url);
     const messageContents = msgcomps[0];
@@ -37,38 +42,40 @@ http.createServer(async function (request, response) {
     //check if the message was sent from a regular user (ie: not workflow/bot)
     if(name === ""){
         console.log("ended request, msg from from webhook!")
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({
-            data: 'I aint payin for your premium workflows ;)',
-        }));
-        return;
-    }
-
-    //check if this is meant for the mc server
-    if(replyId === IDOfParentMessageForTeams2MC && channelId === IDOfChannelForTeams2Mc) {
-        httppost.htppPost(JSON.stringify({
-            data: {
-                name: `${name}`,
-                message: `${messageContents}`
-            }
-        }), MCServerUrl)
-        console.log("\tSent message to mc server!")
         return;
     }
 
     //execute it if it is a command
     if(messageContents.charAt(0) === CommandPrefix){
         console.log("\tcommand detected!");
-        const command = messageContents.split("!")[1].split(" ")[0]
+        const command = messageContents.split("!")[1].split(" ")[0];
+
         if( await CommandHandler.checkIfCommandIsRegistered(command)){
             console.log("\tcommand Valid!");
-            await CommandHandler.executeCommand(command, channelId, replyId, messageContents, name);
+            
+            if( await CommandHandler.checkIfUserHasPermission(command, name)){
+                console.log("\tExecuting Command!");
+                await CommandHandler.executeCommand(command, channelId, replyId, messageContents, name);
+            } else {
+                //repond no perms
+                httpPost.htppPost(genericResponse.getGenericResponse(channelId, replyId, name, "No Permission!!!"), ResponseWebHookUrl);
+                console.log("\tno Permission!");
+            }
         }
+        return; //if it was a command we don't want to do any more checks on it
     }
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.end(JSON.stringify({
-        data: 'I aint payin for your premium workflows ;)',
-    }));
+
+    //check if this is meant for the mc server
+    if(replyId === IDOfParentMessageForTeams2MC && channelId === IDOfChannelForTeams2Mc) {
+        httpPost.htppPost(JSON.stringify({
+            data: {
+                type: "teams2mc",
+                name: `${name}`,
+                message: `${messageContents}`
+            }
+        }), MCServerUrl)
+        console.log("\tSent message to mc server!")
+    }
 
 }).listen(httpPort, error => {
     if (error) {

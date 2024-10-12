@@ -23,13 +23,13 @@ module.exports = {
                                 "type": "TextBlock",
                                 "horizontalAlignment": "Left",
                                 "separator": true,
-                                "text": "Avialable Commands:\n",
+                                "text": "Available Commands:\n",
                                 "wrap": true,
                                 "size": "Large"
                             },
                             {
                                 "type": "TextBlock",
-                                "text": "- !commands\n- !link\n- !unlink\n",
+                                "text": "- !commands\n- !list - list of online players!\n- !link\n- !unlink\n",
                                 "wrap": true,
                                 "spacing": "None"
                             }

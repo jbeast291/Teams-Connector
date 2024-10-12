@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const { AdminNames } = require('./config/config.json');
 
 const commands = [];
 
@@ -17,7 +18,7 @@ module.exports = {
                 const filePath = path.join(commandsPath, file);
                 const command = require(filePath);
                 if ('commandName' in command) {
-                    commands.push([command.commandName, command.fileName]);
+                    commands.push([command.commandName, command.fileName, command.requireAdmin]);
                 } else {
                     console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
                 }
@@ -44,6 +45,21 @@ module.exports = {
         return false;
     },
 
+    checkIfUserHasPermission: async function checkIfUserHasPermission(commandNameToCheck, name) {
+        //check if command exists in cache
+        for(let command of commands){
+            if (command[0] === commandNameToCheck.toLowerCase()) {
+                if(command[2] === true) {//check if admin is required
+                    if(AdminNames.includes(name)){
+                        return true;
+                    }
+                    return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    },
     
 };
 

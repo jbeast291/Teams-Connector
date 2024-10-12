@@ -7,6 +7,7 @@ const mojangApiConnector = require('../../mojangAPIConnector.js');
 
 module.exports = {
 	commandName: "link",
+    requireAdmin: false,
     fileName: __filename,
     execute: async function execute(channelId, replyId, messageContents, name) {
         const code = messageContents.split(" ")[1];
