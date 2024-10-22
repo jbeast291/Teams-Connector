@@ -8,6 +8,7 @@ Commands Currently Available:
 |-----------|
 | !link     |
 | !unlink   |
+| !list     | 
 
 This project uses some hacky workarounds to get past having to pay for premium workflows. There is no way to send a post request for free with workflows so a Dropbox download module is used, requesting a file from a server but sending message contents and info in the url acting as a makeshift post request. Definitely not the most secure it does work :)
 
