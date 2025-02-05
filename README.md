@@ -1,3 +1,4 @@
+NOTICE: 2/4/2025 I accidentally deleted the minecraft velocity plugin connector source code for this project. The project will still work as a proof of concept but will certainly require modification to do something with teams itself.
 # Teams Connector
   Connect Microsoft Teams to Minecraft with Workflows!
 
