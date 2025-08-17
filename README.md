@@ -1,3 +1,4 @@
+NOTICE: 2/4/2025 I accidentally deleted the minecraft velocity plugin connector source code for this project. The project will still work as a proof of concept but will certainly require modification to do something with teams itself.
 # Teams Connector
   Connect Microsoft Teams to Minecraft with Workflows!
 
@@ -8,6 +9,7 @@ Commands Currently Available:
 |-----------|
 | !link     |
 | !unlink   |
+| !list     | 
 
 This project uses some hacky workarounds to get past having to pay for premium workflows. There is no way to send a post request for free with workflows so a Dropbox download module is used, requesting a file from a server but sending message contents and info in the url acting as a makeshift post request. Definitely not the most secure it does work :)
 
