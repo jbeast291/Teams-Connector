@@ -6,7 +6,7 @@ module.exports = {
         .then(res => {
         })
         .catch(error => {
-            console.error(error)
+            console.log(error);
         })
     }
 };

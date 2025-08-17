@@ -5,9 +5,9 @@ const { DBhost, DBuser, DBpassword, DBport, DBdefaultdatabse } = require('../con
 
 class Database {
     constructor() {
-        this.initConnection();
+        this.testConnectionAndSetup();
     }
-    async initConnection() {
+    async testConnectionAndSetup() {
         try {
             this.conn = await mariadb.createConnection({
                 host: DBhost,
@@ -17,12 +17,32 @@ class Database {
                 database: DBdefaultdatabse,
                 trace: true
             });
-            console.log("Database connection established! connection id is: " + this.conn.threadId);
+            console.log("Database connection established! Initial connection id is: " + this.conn.threadId);
         } catch (err) {
             console.log("Failed to connect to Database!: " + err);
+            process.exit(5);
         }
         //run dbsetup.sql setup, after connection is established
         this.setupDatabase();
+    }
+    async openConnection(isSilent) {
+        try {
+            this.conn = await mariadb.createConnection({
+                host: DBhost,
+                user: DBuser,
+                password: DBpassword,
+                port: DBport,
+                database: DBdefaultdatabse,
+                trace: true
+            });
+            if(isSilent){
+                console.log("Database connection established! connection id is: " + this.conn.threadId);
+            }
+            
+        } catch (err) {
+            console.log("Failed to connect to Database!: " + err);
+            process.exit(5);
+        }
     }
 
     async setupDatabase() {
@@ -41,11 +61,13 @@ class Database {
 
         } catch (err) {
             console.log("Setup failed!" + err);
+            process.exit(5);
         }
-        console.log("Database Setup Success");
+        console.log("Database Setup Executed!");
     }
 
     async queryDatabase(statement, values, isSilent) {
+        this.openConnection(isSilent);
         if(isSilent){
             console.log("Querying Database with: " + statement + " and the values " + values);
         }
@@ -55,7 +77,9 @@ class Database {
 
         } catch (err) {
             console.log("Query failed!" + err + statement);
+            process.exit(5);
         }
+        this.conn.end();
     }
 }
 
